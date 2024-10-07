@@ -1,10 +1,48 @@
-/**
- * Global variable to hold state of the system 
- * Function to wake up on the positive clock edge and transition to the next state.
- * Function to fetch the instruction at the program counter if the current state is 'fetch', and store it in the instruction register.
- * Function to decode the instruction if the current state is 'decode', identifying the instruction type (R, I, etc.), operation (based on opcode and function bits), and source/destination registers.
- * Function to execute the operation in the 'execute' state, using a global variable to determine the function (e.g., add, sub, or, shift) and register/immediate operands. Store alu ouput in global var
- * Function to access memory in the 'memory access' state if a load/store instruction is encountered, using the calculated address to access RAM.
- * Function to write back data from the ALU to the destination register in the 'register writeback' state.
- */
- 
+#ifndef PIPELINE_H
+#define PIPELINE_H
+
+#include <ctype.h>
+#include <errno.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <signal.h>
+#include <fcntl.h>
+
+/* Handles for each pipeline thread */
+extern pthread_t fetchThreadHandle;
+extern pthread_t decodeThreadHandle;
+extern pthread_t executeThreadHandle;
+extern pthread_t memAccessThreadHandle;
+extern pthread_t regWriteThreadHandle;
+
+/* Pipes that transfer data from one thread to the next */
+extern int pipe_fetch_to_decode[2];
+extern int pipe_decode_to_execute[2];
+extern int pipe_execute_to_memAccess[2];
+extern int pipe_memAccess_to_regWrite[2];
+
+/* Signal that threads will wait on */
+extern sigset_t set;
+
+/* Function prototypes for all threads */
+void *fetchThread(void *arg);
+void *decodeThread(void *arg);
+void *executeThread(void *arg);
+void *memAccessThread(void *arg);
+void *regWriteThread(void *arg);
+
+/* Function prototypes for initialization and cleanup */
+void flush_pipe(int pipe_fd);
+void cleanup();
+int initialPipes();
+int initializeSignal();
+int initializeThreads();
+
+/* Signal handler for SIGINT (Ctrl+C) */
+void sigint_handler(int sig);
+
+#endif // PIPELINE_H
