@@ -3,6 +3,7 @@
     2d array of memory (2^32 locations by 1 byte) partitioned according to correct architecture
  */
 
+#include <stdint.h>
 
-
-uint8_t ram[UINT32_MAX][1];
+/* RAM*/
+uint8_t ram[UINT32_MAX] = {0};
