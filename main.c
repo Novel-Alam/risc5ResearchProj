@@ -1,42 +1,33 @@
-/**
- * https://docs.google.com/document/d/1uBoNzbyxLWRigHE3vNA7K_XnN6Q9cHTTXlca7TxD934/edit
- */
+#include "controlUnit.h"
+/* Main function */
+int main() {
+    signal(SIGINT, sigint_handler);  // Register SIGINT handler
+    initializeSignal();
+    initialPipes();
+    initializeThreads();
 
-#ifndef MAIN_H
-#define MAIN_H
+    for (;;) {
+        printf("\n\n\n");
+        /* Simulate signal delivery */
+        pthread_kill(regWriteThreadHandle, SIGUSR1);
+        usleep(100);
+        pthread_kill(memAccessThreadHandle, SIGUSR1);
+        usleep(100);
+        pthread_kill(executeThreadHandle, SIGUSR1);
+        usleep(100);
+        pthread_kill(decodeThreadHandle, SIGUSR1);
+        usleep(100);
+        pthread_kill(fetchThreadHandle, SIGUSR1);
+        sleep(5);  // Delay to simulate timing
+        
+    }
 
+    /* Join threads (optional) */
+    pthread_join(fetchThreadHandle, NULL);
+    pthread_join(decodeThreadHandle, NULL);
+    pthread_join(executeThreadHandle, NULL);
+    pthread_join(memAccessThreadHandle, NULL);
+    pthread_join(regWriteThreadHandle, NULL);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
+    return 0;
+}

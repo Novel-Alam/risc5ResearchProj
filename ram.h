@@ -4,6 +4,42 @@
  */
 
 #include <stdint.h>
+#include <string.h>
+
+
+using namespace std;
 
 /* RAM*/
-uint8_t ram[UINT32_MAX] = {0};
+uint32_t ramInstruction[UINT32_MAX];
+uint32_t ramData[UINT32_MAX];
+
+/*
+   Open ASM file (parameter)
+   populate ram reg with 32 bit instructions
+   keep change
+*/
+
+/*
+   2 seperate functions
+   1 that loads instructions from asm file onto ram array
+   1 that takes array address as param and returns machine instruction to decoder
+*/
+
+/* Function 1*/
+/*PREREQ: VALID ASM FILE
+  PREREQ: each instruction seperated by \n key
+  POSTCOND: ram array populated
+*/
+
+void populateRAM(string asmFileName);
+void populateDataRAM();
+
+/* Function 2*/
+/*POSTCOND: RETURN MACHINE CODE STRING*/
+
+uint32_t fetchInstruction(int hexInstruction);
+
+/*Function 3*/
+/*CONVERT HEX TO BINARY*/
+
+uint32_t convertBinary(int hexInstruction);
