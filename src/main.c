@@ -1,4 +1,4 @@
-#include "controlUnit.h"
+#include "../inc/controlUnit.h"
 /* Main function */
 int main() {
     signal(SIGINT, sigint_handler);  // Register SIGINT handler

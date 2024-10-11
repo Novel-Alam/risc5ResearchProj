@@ -1,0 +1,70 @@
+find: /Library/Caches/com.apple.amsengagementd.classicdatavault: Operation not permitted
+find: /Library/Caches/com.apple.aneuserd: Operation not permitted
+find: /Library/Caches/com.apple.aned: Operation not permitted
+find: /System/Volumes/Data/.Spotlight-V100: No such file or directory
+find: /System/Volumes/Data/.com.apple.templatemigration.boot-install: No such file or directory
+find: /System/Volumes/Data/Library/Caches/com.apple.amsengagementd.classicdatavault: Operation not permitted
+find: /System/Volumes/Data/Library/Caches/com.apple.aneuserd: Operation not permitted
+find: /System/Volumes/Data/Library/Caches/com.apple.aned: Operation not permitted
+find: /System/Volumes/Data/MobileSoftwareUpdate: No such file or directory
+find: /System/Volumes/Data/mnt: No such file or directory
+find: /System/Volumes/Data/macOS Install Data: No such file or directory
+find: /System/Volumes/Data/.fseventsd: No such file or directory
+find: /System/Volumes/Data/private/var/networkd/db: Operation not permitted
+find: /System/Volumes/Data/private/var/OOPJit: Operation not permitted
+find: /System/Volumes/Data/private/var/db/appinstalld: Operation not permitted
+find: /System/Volumes/Data/private/var/db/ExtensibleSSO/Configuration: Operation not permitted
+find: /System/Volumes/Data/private/var/db/Spotlight: Operation not permitted
+find: /System/Volumes/Data/private/var/db/sysdiagnose/com.apple.sysdiagnose: Operation not permitted
+find: /System/Volumes/Data/private/var/db/SoC: Operation not permitted
+find: /System/Volumes/Data/private/var/db/DumpPanic: Operation not permitted
+find: /System/Volumes/Data/private/var/db/rmd/secure: Operation not permitted
+find: /System/Volumes/Data/private/var/db/fpsd/dvp: Operation not permitted
+find: /System/Volumes/Data/private/var/db/installcoordinationd: Operation not permitted
+find: /System/Volumes/Data/private/var/db/Spotlight-V100: Operation not permitted
+find: /System/Volumes/Data/private/var/db/oah: Operation not permitted
+find: /System/Volumes/Data/private/var/db/lockdown: Operation not permitted
+find: /System/Volumes/Data/private/var/db/KernelExtensionManagement/Staging: Operation not permitted
+find: /System/Volumes/Data/private/var/db/DifferentialPrivacy: Operation not permitted
+find: /System/Volumes/Data/private/var/db/MobileIdentityService: Operation not permitted
+find: /System/Volumes/Data/private/var/db/searchparty: Operation not permitted
+find: /System/Volumes/Data/private/var/db/CoreDuet/Knowledge: Operation not permitted
+find: /System/Volumes/Data/private/var/db/ConfigurationProfiles/Store: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/3j/ptxj_n1n205378p9_3pbpz3r0000gn/0/com.apple.ScreenTimeAgent/Store: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/3j/ptxj_n1n205378p9_3pbpz3r0000gn/0/com.apple.lockoutagent: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/3j/ptxj_n1n205378p9_3pbpz3r0000gn/0/com.apple.progressd/ClassKit: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/3j/ptxj_n1n205378p9_3pbpz3r0000gn/0/com.apple.exchangesync: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/3j/ptxj_n1n205378p9_3pbpz3r0000gn/0/com.apple.LaunchServices.dv: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/3j/ptxj_n1n205378p9_3pbpz3r0000gn/0/dmd: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/3j/ptxj_n1n205378p9_3pbpz3r0000gn/0/com.apple.nsurlsessiond: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/3j/ptxj_n1n205378p9_3pbpz3r0000gn/0/com.apple.SharedWebCredentials: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/3j/ptxj_n1n205378p9_3pbpz3r0000gn/0/com.apple.routined/dv: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/3j/ptxj_n1n205378p9_3pbpz3r0000gn/0/com.apple.corespeechd: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/3j/ptxj_n1n205378p9_3pbpz3r0000gn/C/com.apple.siriactionsd/ShortcutsSandboxCache: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/3j/ptxj_n1n205378p9_3pbpz3r0000gn/C/com.apple.WebKit.WebContent.Sandbox: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/3j/ptxj_n1n205378p9_3pbpz3r0000gn/C/com.apple.WorkflowKit.BackgroundShortcutRunner/ShortcutsSandboxCache: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/3j/ptxj_n1n205378p9_3pbpz3r0000gn/C/com.apple.WebKit.Networking.Sandbox: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/3j/ptxj_n1n205378p9_3pbpz3r0000gn/C/com.apple.quicklook.ThumbnailsAgent/com.apple.QuickLook.thumbnailcache: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/3j/ptxj_n1n205378p9_3pbpz3r0000gn/C/com.apple.WebKit.GPU.Sandbox: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000sm00006d/0: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000sm00006d/C: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000y800007k/0/com.apple.nsurlsessiond: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.ScreenTimeAgent/Store: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.lockoutagent: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.progressd/ClassKit: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.exchangesync: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/dmd: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.nsurlsessiond: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.SharedWebCredentials: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/0/com.apple.routined/dv: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000z000007r/C/com.apple.quicklook.ThumbnailsAgent/com.apple.QuickLook.thumbnailcache: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000s0000068/C/com.apple.WebKit.WebContent.Sandbox: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000s0000068/C/com.apple.WebKit.Networking.Sandbox: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n00000s0000068/C/com.apple.WebKit.GPU.Sandbox: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/0/com.apple.LaunchServices.dv: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/C/com.apple.WebKit.WebContent.Sandbox: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/C/com.apple.WebKit.Networking.Sandbox: Operation not permitted
+find: /System/Volumes/Data/private/var/folders/zz/zyxvpxvq6csfxvn_n0000000000000/C/com.apple.WebKit.GPU.Sandbox: Operation not permitted
+find: /System/Volumes/Data/private/var/protected/trustd/private: Operation not permitted
+find: /System/Volumes/Data/.DocumentRevisions-V100: No such file or directory
+find: fts_read: Interrupted system call

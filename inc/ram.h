@@ -7,7 +7,7 @@
 #include <string.h>
 
 
-using namespace std;
+
 
 /* RAM*/
 uint32_t ramInstruction[UINT32_MAX];
@@ -31,15 +31,12 @@ uint32_t ramData[UINT32_MAX];
   POSTCOND: ram array populated
 */
 
-void populateRAM(string asmFileName);
+void populateRAM(char* binFileName);
 void populateDataRAM();
 
 /* Function 2*/
 /*POSTCOND: RETURN MACHINE CODE STRING*/
 
-uint32_t fetchInstruction(int hexInstruction);
-
+uint32_t fetchInstruction(int program);
 /*Function 3*/
 /*CONVERT HEX TO BINARY*/
-
-uint32_t convertBinary(int hexInstruction);

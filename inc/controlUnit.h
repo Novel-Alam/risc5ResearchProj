@@ -41,8 +41,18 @@ void cleanup();
 int initialPipes();
 int initializeSignal();
 int initializeThreads();
-
+typedef enum {
+    R_TYPE,
+    I_TYPE,
+    S_TYPE,
+    B_TYPE,
+    U_TYPE,
+    J_TYPE
+}INSTR_TYPE;
 /* Signal handler for SIGINT (Ctrl+C) */
 void sigint_handler(int sig);
 
+INSTR_TYPE get_Instr_Type(uint8_t opcode);
+
+#define MSB_8BIT 0x80 //10000000
 #endif // PIPELINE_H

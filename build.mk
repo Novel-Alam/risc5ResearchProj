@@ -1,12 +1,12 @@
 # Vars
-CC = gcc # C compiler
+CC = clang # C compiler
 SRC_DIR = src
 INC_DIR = inc
 OUT_DIR = out
 BIN_DIR = $(OUT_DIR)/bin
 OBJ_DIR = $(OUT_DIR)/obj
 TARGET = $(BIN_DIR)/main
-CFLAGS = -I$(INC_DIR) -Wall -Wextra # Flags for C Compiler
+CFLAGS = -I$(INC_DIR) -Wall -Wextra -arch arm64# Flags for C Compiler
 
 # Find all .c files in the src directory and corresponding .o files in obj directory
 SRCS = $(wildcard $(SRC_DIR)/*.c)
@@ -17,8 +17,7 @@ all: $(TARGET)
 
 # Start Chain
 # Create binary directory and compile the target
-$(TARGET): $(OBJS)
-	@mkdir -p $(BIN_DIR)
+$(TARGET): $(OBJS) | $(BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ $^
 
 # Compile .c files to .o files
