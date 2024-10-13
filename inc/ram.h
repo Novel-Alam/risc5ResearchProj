@@ -39,4 +39,3 @@ void populateDataRAM();
 
 uint32_t fetchInstruction(int program);
 /*Function 3*/
-/*CONVERT HEX TO BINARY*/
