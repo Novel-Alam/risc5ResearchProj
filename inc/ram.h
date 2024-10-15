@@ -37,6 +37,7 @@ typedef struct{
 void initRam(ram_t *ram, size_t size);
 void populateRAM(char* binFileName, ram_t *ram);
 void populateDataRAM();
+void cleanRam(ram_t *ram);
 
 /* Function 2*/
 /*POSTCOND: RETURN MACHINE CODE STRING*/
