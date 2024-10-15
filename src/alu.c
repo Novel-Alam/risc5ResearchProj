@@ -1,4 +1,4 @@
-#include "../inc/alu.h"
+#include "alu.h"
 
 uint32_t alu_add(uint32_t a, uint32_t b) {
     return 2;

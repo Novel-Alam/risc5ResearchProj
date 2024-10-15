@@ -1,4 +1,4 @@
-#include "../inc/controlUnit.h"
+#include "controlUnit.h"
 #include <ctype.h>
 #include <errno.h>
 #include <pthread.h>
@@ -9,9 +9,9 @@
 #include <unistd.h>
 #include <signal.h>
 #include <fcntl.h>
-#include "../inc/ram.h"
-#include "../inc/registers.h"
-#include "../inc/alu.h"
+#include "ram.h"
+#include "registers.h"
+#include "alu.h"
 
 /* Handles for each pipeline thread */
 pthread_t fetchThreadHandle;

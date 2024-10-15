@@ -1,7 +1,8 @@
 /**
  * Will have 2d array for register file 
  */
-#pragma once 
+#ifndef REGISTERS_H
+#define REGISTERS_H
 #include <stdint.h>
 
 typedef struct {
@@ -12,3 +13,4 @@ typedef struct {
 } registerFile;
 
 extern registerFile regFile;
+#endif //REGISTERS_H

@@ -1,4 +1,4 @@
-#include "../inc/controlUnit.h"
+#include "controlUnit.h"
 #include "ram.h"
 /* Main function */
 int main() {

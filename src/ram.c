@@ -1,4 +1,4 @@
-#include "../inc/ram.h"
+#include "ram.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
