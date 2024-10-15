@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <stdint.h>
 
 /* Handles for each pipeline thread */
 extern pthread_t fetchThreadHandle;

@@ -10,9 +10,12 @@
 
 
 /* RAM*/
-uint32_t ramInstruction[UINT32_MAX];
-uint32_t ramData[UINT32_MAX];
+// uint32_t ramInstruction[UINT32_MAX];
+// uint32_t ramData[UINT32_MAX];
 
+typedef struct{
+   uint32_t *data;
+}ram_t;
 /*
    Open ASM file (parameter)
    populate ram reg with 32 bit instructions
@@ -31,7 +34,8 @@ uint32_t ramData[UINT32_MAX];
   POSTCOND: ram array populated
 */
 
-void populateRAM(char* binFileName);
+void initRam(ram_t *ram, size_t size);
+void populateRAM(char* binFileName, ram_t *ram);
 void populateDataRAM();
 
 /* Function 2*/

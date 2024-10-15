@@ -1,3 +1,5 @@
+#!/bin/bash
+
 current_arch=$(uname -p) #x86_64, arm64, etc
 unameOut="$(uname -s)"
 case "${unameOut}" in
@@ -8,6 +10,14 @@ case "${unameOut}" in
     MSYS_NT*)   machine=Git;;
     *)          machine="UNKNOWN:${unameOut}"
 esac
-echo OS:${machine}
+if [ "$#" -ne 0 ]; then # Parse arguments
+    python3 build.py "$@"
+    if [ $? -ne 0 ]; then
+        echo "Python script status code $?."
+        exit 1
+    fi
+fi
 
-# echo $current_arch $OS
+echo "Executing image"
+./out/bin/main
+

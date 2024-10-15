@@ -1,10 +1,16 @@
 #include "../inc/controlUnit.h"
+#include "ram.h"
 /* Main function */
 int main() {
     signal(SIGINT, sigint_handler);  // Register SIGINT handler
     initializeSignal();
     initialPipes();
     initializeThreads();
+
+    ram_t *data_ram;
+    ram_t *instruction_ram;
+    initRam(data_ram, UINT32_MAX);
+    initRam(instruction_ram, UINT32_MAX);
 
     for (;;) {
         printf("\n\n\n");
@@ -29,5 +35,7 @@ int main() {
     pthread_join(memAccessThreadHandle, NULL);
     pthread_join(regWriteThreadHandle, NULL);
 
+    cleanRam(data_ram);
+    cleanRam(instruction_ram);
     return 0;
 }
