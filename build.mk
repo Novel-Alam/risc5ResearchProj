@@ -9,8 +9,10 @@ OBJ_DIR = $(OUT_DIR)/obj
 TARGET = $(BIN_DIR)/main
 CFLAGS = -I$(INC_DIR) -Wall -Wextra# Flags for C Compiler
 
-# Find all .c files in the src directory and corresponding .o files in obj directory
+# Find all .c files in the src directory
 SRCS = $(wildcard $(SRC_DIR)/*.c)
+
+# Glob src/ for .c files, replace file names with .o
 OBJS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 
 # Make All
