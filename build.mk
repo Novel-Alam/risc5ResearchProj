@@ -17,7 +17,8 @@ all: $(TARGET)
 
 # Start Chain
 # Create binary directory and compile the target
-$(TARGET): $(OBJS) | $(BIN_DIR)
+$(TARGET): $(OBJS)
+	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ $^
 
 # Compile .c files to .o files
