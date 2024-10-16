@@ -151,27 +151,26 @@ INSTR_TYPE get_Instr_Type(uint8_t opcode){
         printf("Invalid Instruction Type: %d", opcode);
         exit(1);
     }
-    if (opcode == 0b0110011){
-        return R_TYPE;
-    }
-    else if (opcode == 0b0000011 || opcode == 0b0010011 || opcode == 0b1100111){
-        return I_TYPE;
-    }
-    else if (opcode == 0b0100011){
-        return S_TYPE;
-    }
-    else if (opcode == 0b1100011){
-        return B_TYPE;
-    }
-    else if (opcode == 0b0110111){
-        return U_TYPE;
-    }
-    else if (opcode == 0b1101111){
-        return J_TYPE;
-    }
-    else{
-        printf("OPCode not recognized: %d", opcode);
-        exit(1);
+    switch(opcode){
+        case(0b0110011):
+            return R_TYPE;
+        case(0b0000011):
+            return I_TYPE;
+        case(0b0010011):
+            return I_TYPE;
+        case(0b1100111):
+            return I_TYPE;
+        case(0b0100011):
+            return S_TYPE;
+        case(0b1100011):
+            return B_TYPE;
+        case(0b0110111):
+            return U_TYPE;
+        case(0b1101111):
+            return J_TYPE;
+        default:
+            printf("OPCode not recognized: %d", opcode);
+            exit(1);
     }
 }
 
