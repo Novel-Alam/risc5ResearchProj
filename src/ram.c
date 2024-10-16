@@ -7,6 +7,7 @@
 void initRam(ram_t *ram, size_t size){
     ram = (ram_t*)malloc(sizeof(ram_t));
     ram->data = (uint32_t*)calloc(size, sizeof(uint32_t));
+    ram->size = size;
 }
 
 // Free both the ram memory and the struct instance of the ram

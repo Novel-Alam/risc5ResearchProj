@@ -17,6 +17,7 @@
 
 typedef struct{
    uint32_t *data;
+   size_t size;
 }ram_t;
 /*
    Open ASM file (parameter)
@@ -46,4 +47,5 @@ void cleanRam(ram_t *ram);
 
 uint32_t fetchInstruction(int program);
 /*Function 3*/
+
 #endif //RAM_H
