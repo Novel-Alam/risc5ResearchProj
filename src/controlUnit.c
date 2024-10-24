@@ -185,8 +185,8 @@ INSTR_TYPE get_Instr_Type(uint8_t opcode){
         uint8_t microOp; /* Decoded instruction mnemonic */
         //RV32 atomic extension use
         uint8_t funct5 = NULL;
-        uint8_t aq = NULL;
-        uint8_t rl = NULL;
+        bool aq = NULL;
+        bool rl = NULL;
     } decodedFields;
 
 
