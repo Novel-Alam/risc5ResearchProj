@@ -13,6 +13,21 @@
 #include "registers.h"
 #include "alu.h"
 
+#define INSTRUCTION_TO_RD(instructionToDecode) ((instructionToDecode >> 7) & 0b11111)
+#define INSTRUCTION_TO_FUNCT3(instructionToDecode) ((instructionToDecode >> 12) & 0b111)
+#define INSTRUCTION_TO_RS1(instruction) (((instruction) >> 15) & 0b1111)
+#define INSTRUCTION_TO_RS2(instruction) (((instruction) >> 20) & 0b1111)
+#define INSTRUCTION_TO_FUNCT7(instruction) (((instruction) >> 25) & 0b1111111)
+
+#define INSTRUCTION_TO_IMMI(instructionToDecode) ( (instructionToDecode >> 20) && 0b1111111)
+
+#define LOGICAL_I_TYPE 0b0010011
+#define LOAD_I_TYPE 0b0000011
+#define JAL_I_TYPE 0b1100111
+#define FENCE_I_TYPE 0b0001111 //Memory barrier instructions 
+
+
+
 /* Handles for each pipeline thread */
 pthread_t fetchThreadHandle;
 pthread_t decodeThreadHandle;
@@ -28,6 +43,11 @@ int pipe_memAccess_to_regWrite[2];
 
 /* Signal that threads will wait on */
 sigset_t set;
+
+/* Holds the current state of the system */
+currentStage currStage = FETCH;
+
+
 
 /* Function prototypes for all threads */
 void *fetchThread(void *arg);
@@ -91,7 +111,7 @@ int initialPipes() {
     /* Convert read ends to non-blocking */
     int flags;
     flags = fcntl(pipe_fetch_to_decode[0], F_GETFL, 0);
-    fcntl(pipe_fetch_to_decode[0], F_SETFL, flags | O_NONBLOCK);
+    fcntl(pipe_fetch_to_decode[0], F_SETFL, flags | O_NONBLOCK); /* or the nonblock bit*/
 
     flags = fcntl(pipe_decode_to_execute[0], F_GETFL, 0);
     fcntl(pipe_decode_to_execute[0], F_SETFL, flags | O_NONBLOCK);
@@ -129,7 +149,7 @@ void *fetchThread(void *arg) {
         /* Block on signal */
         sigwait(set, &signal);
 
-        if (signal == SIGUSR1) {
+        if (signal == SIGUSR1 && currStage == FETCH) {
             printf("Fetch Thread\n");
 
             /* Fetch instruction from Instruction memory using program counter */
@@ -174,21 +194,6 @@ INSTR_TYPE get_Instr_Type(uint8_t opcode){
     }
 }
 
-    typedef struct {
-        INSTR_TYPE instruction_type;
-        uint8_t opcode;
-        uint8_t rd;
-        uint8_t funct3;
-        uint8_t rs1;
-        uint8_t rs2;
-        uint8_t funct7;
-        uint8_t microOp; /* Decoded instruction mnemonic */
-        //RV32 atomic extension use
-        uint8_t funct5 = NULL;
-        bool aq = NULL;
-        bool rl = NULL;
-    } decodedFields;
-
 
 /* Decode Thread */
 void *decodeThread(void *arg) {
@@ -201,7 +206,7 @@ void *decodeThread(void *arg) {
         /* Block on signal */
         sigwait(set, &signal);
 
-        if (signal == SIGUSR1 && read(pipe_fetch_to_decode[0], read_buf, sizeof(read_buf)) > 0) {
+        if (signal == SIGUSR1 && read(pipe_fetch_to_decode[0], read_buf, sizeof(read_buf)) && (currStage == DECODE) ) {
             printf("Decode Thread: %s\n", read_buf);
 
             /* Instructions to decode */
@@ -209,22 +214,22 @@ void *decodeThread(void *arg) {
 
             decodedFields df = {0};
             df.opcode = instructionToDecode & 0b1111111; /* extract opcode*/
-
+            df.instruction_type = get_Instr_Type(df.opcode);//we have 3 i types btw each has diff opcode
+            INSTR_TYPE type = df.instruction_type;
             /* Determine type of instruction */
-            switch(df.opcode){
-                case 0b0110011://Rtype
-                    df.instruction_type = R_TYPE;
-                    df.rd = (instructionToDecode >> 7) & 0b11111;
-                    df.funct3 = (instructionToDecode >> 12) & 0b111;
-                    df.rs1 = (instructionToDecode >> 15) & 0b1111;
-                    df.rs2 = (instructionToDecode >> 20) & 0b1111;
-                    df.funct7 = (instructionToDecode >> 25) & 0b1111111;
-                    break;//wtf is this
+            switch(type){
+                case R_TYPE://Rtype
+                    df.instrFields.r_type.rd = INSTRUCTION_TO_RD(instructionToDecode);
+                    df.instrFields.r_type.funct3 = INSTRUCTION_TO_FUNCT3(instructionToDecode);
+                    df.instrFields.r_type.rs1 = INSTRUCTION_TO_RS1(instructionToDecode);
+                    df.instrFields.r_type.rs2 = INSTRUCTION_TO_RS2(instructionToDecode);
+                    df.instrFields.r_type.funct7 = INSTRUCTION_TO_FUNCT7(instructionToDecode);
+                    //bro missed like 10 break statements
 
                     /* Determine exact instruction*/
-                    switch (df.funct3) {
+                    switch (df.instrFields.r_type.funct3) {
                         case 0x0:
-                            switch (df.funct7) {
+                            switch (df.instrFields.r_type.funct7) {
                                 case 0x00:
                                     df.microOp = OP_ADD;
                                     break;
@@ -233,10 +238,11 @@ void *decodeThread(void *arg) {
                                     break;
                                 default:
                                     perror("Incorrect funct7");
-
+                                    break;
                             }
+                            break;
                         case 0x4:
-                            switch (df.funct7) {
+                            switch (df.instrFields.r_type.funct7) {
                                 case 0x00:
                                     df.microOp = OP_XOR;
                                     break;
@@ -244,31 +250,32 @@ void *decodeThread(void *arg) {
                                     perror("Incorrect funct7");
 
                             }
+                            break;
                         case 0x6:
-                            switch (df.funct7) {
+                            switch (df.instrFields.r_type.funct7) {
                                 case 0x00:
                                     df.microOp = OP_OR;
                                     break;
                                 default:
                                     perror("Incorrect funct7");
-
                             }
+                            break;
                         case 0x7:
-                            switch (df.funct7) {
+                            switch (df.instrFields.r_type.funct7) {
                                 case 0x00:
                                    df.microOp = OP_AND;
                                    break;
                                 default:
                                     perror("Incorrect funct7");
-
                             }
+                            break;
                         case 0x1:
-                            switch (df.funct7) {
+                            switch (df.instrFields.r_type.funct7) {
                                 case 0x00:
                                     df.microOp = OP_SLL;
                                     break;
                                 case 0x01://mul extention
-                                    switch(df.funct3){
+                                    switch(df.instrFields.r_type.funct3){
                                         case 0x0:
                                             df.microOp = OP_MUL;
                                             break;
@@ -276,10 +283,10 @@ void *decodeThread(void *arg) {
                                             df.microOp = OP_MULH;
                                             break;
                                         case 0x2:
-                                            df.microOp = MULSU;
+                                            df.microOp = OP_MULSU;
                                             break;
                                         case 0x3:
-                                            df.microOp = MULU;
+                                            df.microOp = OP_MULU;
                                             break;
                                         case 0x4:
                                             df.microOp = OP_DIV;
@@ -302,8 +309,9 @@ void *decodeThread(void *arg) {
                                     perror("Incorrect funct7");
 
                             }
+                            break;
                         case 0x5:
-                            switch (df.funct7) {
+                            switch (df.instrFields.r_type.funct7) {
                                 case 0x00:
                                     df.microOp = OP_SRL;
                                     break;
@@ -314,8 +322,9 @@ void *decodeThread(void *arg) {
                                     perror("Incorrect funct7");
 
                             }
+                            break;
                         case 0x2:
-                            switch (df.funct7) {
+                            switch (df.instrFields.r_type.funct7) {
                                 case 0x00:
                                     df.microOp = OP_SLT;
                                     break;
@@ -323,8 +332,9 @@ void *decodeThread(void *arg) {
                                     perror("Incorrect funct7");
 
                             }
+                            break;
                         case 0x3:
-                            switch (df.funct7) {
+                            switch (df.instrFields.r_type.funct7) {
                                 case 0x00:
                                     df.microOp = OP_SLTU;
                                     break;
@@ -332,91 +342,108 @@ void *decodeThread(void *arg) {
                                     perror("Incorrect funct7");
 
                             }
-
+                            break;
                         default:
                             perror("incorect funct3 bits");
                     }
-                /* logical I type */
-                case 0b0010011:
-                    df.instruction_type = I_TYPE;
-                    df.rd = (instructionToDecode >> 7) & 0b11111;
-                    df.funct3 = (instructionToDecode >> 12) & 0b111;
-                    df.rs1 = (instructionToDecode >> 15) & 0b1111;
-                    df.rs2 = (instructionToDecode >> 20) & 0b1111;
-                    df.funct7 = (instructionToDecode >> 25) & 0b1111111;
-                    switch(df.funct3){
-                        case 0x0:
-                            df.microOp = OP_ADDI;
-                            break;
-                        case 0x1:
-                            if(df.funct7 != 0x0){
-                            perror("slli overflow error");
-                        }
-                            df.microOp = OP_SLLI;
-                            break;
-                        case 0x2:
-                            df.microOp = OP_SLTI;
-                            break;
-                        case 0x3:
-                            df.microOp = OP_SLTIU;
-                            break;
-                        case 0x4:
-                            df.microOp = OP_XORI;
-                            break;
-                        case 0x5:
-                            switch(df.funct7){
-                                case 0x0 :
-                                    df.microOp = OP_SRLI;
-                                    break;
-                                case 0x20 :
-                                    df.microOp = OP_SRAI;
-                                    break;
-                                default:
-                                    perror("illegal imm for srli and srai differentiation\n");
+                case I_TYPE:
+                    df.instrFields.i_type.rd = INSTRUCTION_TO_RD(instructionToDecode);
+                    df.instrFields.i_type.funct3 = INSTRUCTION_TO_FUNCT3(instructionToDecode);
+                    df.instrFields.i_type.rs1 = INSTRUCTION_TO_RS1(instructionToDecode);
+                    df.instrFields.i_type.imm12 = INSTRUCTION_TO_IMMI(instructionToDecode);
+                    // Logical I-type
+                    if (df.opcode == LOGICAL_I_TYPE){
+                        switch(df.instrFields.i_type.funct3){
+                            case 0x0:
+                                df.microOp = OP_ADDI;
+                                break;
+                            case 0x1:
+                                df.microOp = OP_SLLI;
+                                break;
+                            case 0x2:
+                                df.microOp = OP_SLTI;
+                                break;
+                            case 0x3:
+                                df.microOp = OP_SLTIU;
+                                break;
+                            case 0x4:
+                                df.microOp = OP_XORI;
+                                break;
+                            case 0x5:
+                                switch(df.instrFields.i_type.funct3){
+                                    case 0x0 :
+                                        df.microOp = OP_SRLI;
+                                        break;
+                                    case 0x20 :
+                                        df.microOp = OP_SRAI;
+                                        break;
+                                    default:
+                                        perror("illegal imm for srli and srai differentiation\n");
+                                }
+                                break;
+                            case 0x6:
+                                df.microOp = OP_ORI;
+                                break;
+                            case 0x7:
+                                df.microOp = OP_ANDI;
+                                break;
+                            default:
+                                perror("404 I type funct 3 not found\n");
+                                printf("%x LoadI-type instruction not found", df.opcode);
                             }
-                            break;
-                        case 0x6:
-                            df.microOp = OP_ORI;
-                            break;
-                        case 0x7:
-                            df.microOp = OP_ANDI;
-                            break;
-                        default:
-                            perror("404 I type funct 3 not found\n");
+                    }
+                    //ecall/ebreak
+                    else if(df.opcode == 0b1110011){
+                        switch(df.instrFields.i_type.imm12){
+                            case 0x0:
+                                df.microOp = OP_ECALL;
+                                break;
+                            case 0x1:
+                                df.microOp = OP_EBREAK;//idk how we're gonna implement this lmao
+                                break;
+                            default:
+                                perror("ecall/break error");//was spelled peerror lmao
+                        }
+                    }
+                    //Load I-type
+                    else if(df.opcode == LOAD_I_TYPE){
+                        switch(df.instrFields.i_type.funct3){
+                            case 0x0:
+                                df.microOp = OP_LB;
+                                break;
+                            case 0x1:
+                                df.microOp = OP_LH;
+                                break;
+                            case 0x2:
+                                df.microOp = OP_LW;
+                                break;
+                            case 0x4:
+                                df.microOp = OP_LBU;
+                                break;
+                            case 0x5:
+                                df.microOp = OP_LHU;
+                                break;
+                            default:
+                                printf("%x Load I-type instruction not found", df.opcode);
+                                break;
+                        }
+                    }
+
+                    else if(df.opcode== JAL_I_TYPE) {
+                        switch(df.instrFields.i_type.funct3) {
+                            case 0x0:
+                                df.microOp = OP_JAL;
+                                break;
+                            default:
+                                perror("404 I type funct 3 not found\n");
+                                break;
+                        }
                     }
                     break;
-                /*load I Type*/
-                case 0b0000011:
-                    df.instruction_type = I_TYPE;
-                    df.rd = (instructionToDecode >> 7) & 0b11111;
-                    df.funct3 = (instructionToDecode >> 12) & 0b111;
-                    df.rs1 = (instructionToDecode >> 15) & 0b1111;
-                    df.rs2 = (instructionToDecode >> 20) & 0b1111;
-                    df.funct7 = (instructionToDecode >> 25) & 0b1111111;
-                    switch(df.funct3){
-                        case 0x0:
-                            df.microOp = OP_LB;
-                            break;
-                        case 0x1:
-                            df.microOp = OP_LH;
-                            break;
-                        case 0x2:
-                            df.microOp = OP_LW;
-                            break;
-                        case 0x4:
-                            df.microOp = OP_LBU;
-                            break;
-                        case 0x5:
-                            df.microOp = OP_LHU;
-                            break;
-                        default:
-                            perror("load I Type funct3 error");
-                    }
-                    break;
-                case 0b0100011:
+                case S_TYPE:
 
                     break;
-                case 0b1100011:
+                case B_TYPE:
 
                     break;
                 case U_TYPE:
@@ -459,19 +486,21 @@ void *executeThread(void *arg) {
         /* Block on signal */
         sigwait(set, &signal);
 
-        if (signal == SIGUSR1 && read(pipe_decode_to_execute[0], &df, sizeof(df)) > 0) {
+        if (signal == SIGUSR1 && read(pipe_decode_to_execute[0], &df, sizeof(df)) && (currStage == EXECUTE) ){
             /* Execute the command */
             switch (df.microOp) {
                 case OP_ADD: 
-                    aluResult =  alu_add(regFile.generalRegisters[df.rs1], regFile.generalRegisters[df.rs2]);
+                    aluResult =  alu_add(regFile.generalRegisters[df.instrFields.r_type.rs1], regFile.generalRegisters[df.instrFields.r_type.rs2]);
                     break;
+                case OP_ADDI:
+                    aluResult = alu_add(regFile.generalRegisters[df.instrFields.i_type.rs1], (uint32_t)df.instrFields.i_type.imm12);
                 case OP_SUB:
-                    aluResult =  alu_sub(regFile.generalRegisters[df.rs1], regFile.generalRegisters[df.rs2]);
+                    aluResult =  alu_sub(regFile.generalRegisters[df.instrFields.r_type.rs1], regFile.generalRegisters[df.instrFields.r_type.rs2]);
                     break;
 
                 /* add more later*/
                 default:
-                    perror("Instruciton no implimented yet");
+                    perror("Instruction no implimented yet");
             }
             
 
@@ -493,7 +522,7 @@ void *memAccessThread(void *arg) {
         /* Block on signal */
         sigwait(set, &signal);
 
-        if (signal == SIGUSR1 && read(pipe_execute_to_memAccess[0], &valueFromExecute, sizeof(valueFromExecute)) > 0) {
+        if (signal == SIGUSR1 && read(pipe_execute_to_memAccess[0], &valueFromExecute, sizeof(valueFromExecute)) && (currStage == MEM_ACCESS) ) {
             printf("Memory Access Thread: %s\n", valueFromExecute);
             char message[] = "Memory accessed";
             
@@ -514,7 +543,7 @@ void *regWriteThread(void *arg) {
         /* Block on signal */
         sigwait(set, &signal);
 
-        if (signal == SIGUSR1 && read(pipe_memAccess_to_regWrite[0], &valueFromExecute, sizeof(valueFromExecute)) > 0) {
+        if (signal == SIGUSR1 && read(pipe_memAccess_to_regWrite[0], &valueFromExecute, sizeof(valueFromExecute)) && (currStage == REG_WRITE_BACK) ) {
             printf("Register Write Thread: %s\n", valueFromExecute);
             regFile.generalRegisters[2];
         } else {

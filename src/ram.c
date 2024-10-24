@@ -5,7 +5,7 @@
 
 //Allocate 0 block of memory of size. Size is number of indicies, not necessarily bytes.
 void initRam(ram_t *ram, size_t size){
-    ram = (ram_t*)malloc(sizeof(ram_t));
+    ram = (ram_t*)malloc(sizeof(ram_t)); 
     ram->data = (uint32_t*)calloc(size, sizeof(uint32_t));
     ram->size = size;
 }
@@ -16,13 +16,6 @@ void cleanRam(ram_t *ram){
     free(ram);
 }
 
-//TODO: Delete this?
-void populateDataRAM() {
-    for (size_t i = 0; i < UINT32_MAX; i++)
-    {
-        // ramData[i] = 0x000000000;
-    }    
-}
 
 void populateRAM(char* ASMfile, ram_t *ram) {
     FILE *asmFile = fopen(ASMfile,"rb"); //change file format later
