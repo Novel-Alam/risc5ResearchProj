@@ -208,7 +208,7 @@ void *decodeThread(void *arg) {
 
             /* Determine type of instruction */
             switch(df.opcode){
-                case 0b0110011:
+                case 0b0110011://Rtype
                     df.instruction_type = R_TYPE;
                     df.rd = (instructionToDecode >> 7) & 0b11111;
                     df.funct3 = (instructionToDecode >> 12) & 0b111;
