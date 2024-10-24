@@ -9,34 +9,74 @@
  * Control unit fetch state sets operation to one of these in this enums
  */
 enum microOp {
-    OP_ADD,           
-    OP_SUB,           
-    OP_MUL,           
-    OP_DIV,           
-    OP_DIV_SIGNED,    
-    OP_MOD,           
+     OP_ADD,
+     OP_SUB,
+     OP_XOR,
+     OP_OR,
+     OP_AND,
+     OP_SLL,
+     OP_SRL,
+     OP_SRA,
+     OP_SLT,
+     OP_SLTU,
 
-    OP_AND,           
-    OP_OR,            
-    OP_XOR,           
-    OP_NOT,           
+     OP_ADDI,
+     OP_XORI,
+     OP_ORI,
+     OP_ANDI,
+     OP_SLLI,
+     OP_SRLI,
+     OP_SRAI,
+     OP_SLTI,
+     OP_SLTIU,
 
-    OP_SLL,           
-    OP_SRL,           
-    OP_SRA,           
+     OP_LB,
+     OP_LH,
+     OP_LW,
+     OP_LBU,
+     OP_LHU,
 
-    OP_SLT,           
-    OP_SLTU,          
-    OP_EQ,            
-    OP_NE,            
+     OP_SB,
+     OP_SH,
+     OP_SW,
 
-    OP_ADDI,          
-    OP_ANDI,          
-    OP_ORI,           
-    OP_XORI,          
+     OP_BEQ,
+     OP_BNE,
+     OP_BLT,
+     OP_BGE,
+     OP_BLTU,
+     OP_BGEU,
 
-    OP_ADD_OVERFLOW,  
-    OP_SUB_OVERFLOW   
+     OP_JAL,
+     OP_JALR,
+
+     OP_LUI,
+     OP_AUIPC,
+
+     OP_ECALL,
+     OP_EBREAK,
+
+    //extensions
+    //multiply extension
+     OP_MUL,
+     OP_MULH,
+     OP_MULSU,
+     OP_MULU,
+     OP_DIV,
+     OP_DIVU,
+     OP_REM,
+     OP_REMU,
+
+    //atomic extension
+    OP_LRW,
+    OP_SCW,
+    OP_AMOSWAPW,
+    OP_AMOADDW,
+    OP_AMOANDW,
+    OP_AMOORW,
+    OP_AMOXORW,
+    OP_AMOMAXW,
+    OP_AMOMINW
 };
 
 /**

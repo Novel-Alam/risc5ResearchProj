@@ -183,6 +183,10 @@ INSTR_TYPE get_Instr_Type(uint8_t opcode){
         uint8_t rs2;
         uint8_t funct7;
         uint8_t microOp; /* Decoded instruction mnemonic */
+        //RV32 atomic extension use
+        uint8_t funct5 = NULL;
+        uint8_t aq = NULL;
+        uint8_t rl = NULL;
     } decodedFields;
 
 
@@ -215,7 +219,7 @@ void *decodeThread(void *arg) {
                     df.rs1 = (instructionToDecode >> 15) & 0b1111;
                     df.rs2 = (instructionToDecode >> 20) & 0b1111;
                     df.funct7 = (instructionToDecode >> 25) & 0b1111111;
-                    break;
+                    break;//wtf is this
 
                     /* Determine exact instruction*/
                     switch (df.funct3) {
@@ -293,10 +297,122 @@ void *decodeThread(void *arg) {
                         default:
                             perror("incorect funct3 bits");
                     }
-
-
-                case I_TYPE:
-                
+                //mul R type
+                case 0b0110011:
+                    df.instruction_type = I_TYPE;
+                    df.rd = (instructionToDecode >> 7) & 0b11111;
+                    df.funct3 = (instructionToDecode >> 12) & 0b111;
+                    df.rs1 = (instructionToDecode >> 15) & 0b1111;
+                    df.rs2 = (instructionToDecode >> 20) & 0b1111;
+                    df.funct7 = (instructionToDecode >> 25) & 0b1111111;
+                    if(df.funct7 != 0x1){
+                        perror("mul instruction got fucked");
+                    }
+                    switch(df.funct3){
+                        case 0x0:
+                            df.microOP = OP_MUL;
+                            break;
+                        case 0x1:
+                            df.microOP = OP_MULH;
+                            break;
+                        case 0x2:
+                            df.microOP = MULSU;
+                            break;
+                        case 0x3:
+                            df.microOP = MULU;
+                            break;
+                        case 0x4:
+                            df.microOP = OP_DIV;
+                            break;
+                        case 0x5:
+                            df.microOP = OP_DIVU;
+                            break;
+                        case 0x6:
+                            df.microOP = OP_REM;
+                            break;
+                        case 0x7:
+                            df.microOP = OP_REMU;
+                            break;
+                        default:
+                            perror("404 r type mul op not found");
+                    }
+                    break;
+                /* logical I type */
+                case 0b0010011:
+                    df.instruction_type = I_TYPE;
+                    df.rd = (instructionToDecode >> 7) & 0b11111;
+                    df.funct3 = (instructionToDecode >> 12) & 0b111;
+                    df.rs1 = (instructionToDecode >> 15) & 0b1111;
+                    df.rs2 = (instructionToDecode >> 20) & 0b1111;
+                    df.funct7 = (instructionToDecode >> 25) & 0b1111111;
+                    switch(df.funct3){
+                        case 0x0:
+                            df.microOp = OP_ADDI;
+                            break;
+                        case 0x1:
+                            if(df.funct7 != 0x0){
+                            perror("slli overflow error");
+                        }
+                            df.microOp = OP_SLLI;
+                            break;
+                        case 0x2:
+                            df.microOp = OP_SLTI;
+                            break;
+                        case 0x3:
+                            df.microOP = OP_SLTIU;
+                            break;
+                        case 0x4:
+                            df.microOP = OP_XORI;
+                            break;
+                        case 0x5:
+                            switch(df.funct7){
+                                case 0x0 :
+                                    df.microOp = OP_SRLI;
+                                    break;
+                                case 0x20 :
+                                    df.microOp = OP_SRAI;
+                                    break;
+                                default:
+                                    perror("illegal imm for srli and srai differentiation\n");
+                            }
+                            break;
+                        case 0x6:
+                            df.microOP = OP_ORI;
+                            break;
+                        case 0x7:
+                            df.microOP = OP_ANDI;
+                            break;
+                        default:
+                            perror("404 I type funct 3 not found\n");
+                    }
+                    break;
+                /*load I Type*/
+                case 0b0000011:
+                    df.instruction_type = I_TYPE;
+                    df.rd = (instructionToDecode >> 7) & 0b11111;
+                    df.funct3 = (instructionToDecode >> 12) & 0b111;
+                    df.rs1 = (instructionToDecode >> 15) & 0b1111;
+                    df.rs2 = (instructionToDecode >> 20) & 0b1111;
+                    df.funct7 = (instructionToDecode >> 25) & 0b1111111;
+                    switch(df.funct3){
+                        case 0x0:
+                            df.microOP = OP_LB;
+                            break;
+                        case 0x1:
+                            df.microOP = OP_LH;
+                            break;
+                        case 0x2:
+                            df.microOP = OP_LW;
+                            break;
+                        case 0x4:
+                            df.microOP = OP_LBU;
+                            break;
+                        case 0x5:
+                            df.microOP = OP_LHU;
+                            break;
+                        default:
+                            perror("load I Type funct3 error");
+                    }
                     break;
                 case S_TYPE:
 
