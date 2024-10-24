@@ -9,8 +9,8 @@ typedef struct {
     uint32_t programCounter;
     uint32_t instructionRegister;
 
-    uint32_t generalRegisters[64];
+    uint32_t *generalRegisters; //Size: 32 elements
 } registerFile;
-
+void initRegFile(registerFile *regFile);
 extern registerFile regFile;
 #endif //REGISTERS_H

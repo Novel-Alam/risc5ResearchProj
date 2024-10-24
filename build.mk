@@ -9,6 +9,12 @@ OBJ_DIR = $(OUT_DIR)/obj
 TARGET = $(BIN_DIR)/main
 CFLAGS = -I$(INC_DIR) -Wall -Wextra# Flags for C Compiler
 
+ifdef DEBUG
+	CFLAGS += -g
+# else 
+# 	CFLAGS += -DNDEBUG
+endif
+
 # Find all .c files in the src directory
 SRCS = $(wildcard $(SRC_DIR)/*.c)
 

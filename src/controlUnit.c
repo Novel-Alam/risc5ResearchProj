@@ -18,8 +18,10 @@
 #define INSTRUCTION_TO_RS1(instruction) (((instruction) >> 15) & 0b1111)
 #define INSTRUCTION_TO_RS2(instruction) (((instruction) >> 20) & 0b1111)
 #define INSTRUCTION_TO_FUNCT7(instruction) (((instruction) >> 25) & 0b1111111)
-
-#define INSTRUCTION_TO_IMMI(instructionToDecode) ( (instructionToDecode >> 20) && 0b1111111)
+#define INSTRUCTION_TO_IMM_B(instruction) ((instruction >> 25) & 0b1111111) + ((instruction >> 6) & 0b11111)
+#define INSTRUCTION_TO_IMM_U(instruction) (instruction >> 11 & 0b11111111111)
+#define INSTRUCTION_TO_IMMI_20(instructionToDecode) ( (instructionToDecode >> 20) && 0b1111111)
+// #define INSTRUCTION_TO_IMMI_11(instructionToDecode) ( (instructionToDecode >> 20) && 0b1111111)
 
 #define LOGICAL_I_TYPE 0b0010011
 #define LOAD_I_TYPE 0b0000011
@@ -153,64 +155,42 @@ void *fetchThread(void *arg) {
             printf("Fetch Thread\n");
 
             /* Fetch instruction from Instruction memory using program counter */
-            regFile.instructionRegister = fetchInstruction( regFile.programCounter );
+            regFile.instructionRegister =  0x00410093;//addi   //fetchInstruction( regFile.programCounter );
 
             /* Incriment Program counter by 4 bytes (32 bits) */
-            regFile.programCounter += 32;
+            regFile.programCounter += 4;
 
             /* Pass the fetched uint32_t instruction */
-            write( pipe_fetch_to_decode[1], (uint32_t*)regFile.instructionRegister, sizeof(regFile.instructionRegister) );
+            write( pipe_fetch_to_decode[1], (char *) &regFile.instructionRegister, sizeof(regFile.instructionRegister) );
+
+            currStage = DECODE;
+            pthread_kill(decodeThreadHandle, SIGUSR1);
+
         } else {
             perror("Different signal received");
         }
     }
 }
 
-INSTR_TYPE get_Instr_Type(uint8_t opcode){
-    if ((opcode & MSB_8BIT) != 0){
-        printf("Invalid Instruction Type: %d", opcode);
-        exit(1);
-    }
-    switch(opcode){
-        case(0b0110011):
-            return R_TYPE;
-        case(0b0000011):
-            return I_TYPE;
-        case(0b0010011):
-            return I_TYPE;
-        case(0b1100111):
-            return I_TYPE;
-        case(0b0100011):
-            return S_TYPE;
-        case(0b1100011):
-            return B_TYPE;
-        case(0b0110111):
-            return U_TYPE;
-        case(0b1101111):
-            return J_TYPE;
-        default:
-            printf("OPCode not recognized: %d", opcode);
-            exit(1);
-    }
-}
 
 
 /* Decode Thread */
 void *decodeThread(void *arg) {
     sigset_t *set = (sigset_t *)arg;
     int signal;
-    char read_buf[5000];
+    
+    /* Instructions to decode */
+    uint32_t instructionToDecode;
 
 
     for (;;) {
         /* Block on signal */
         sigwait(set, &signal);
 
-        if (signal == SIGUSR1 && read(pipe_fetch_to_decode[0], read_buf, sizeof(read_buf)) && (currStage == DECODE) ) {
-            printf("Decode Thread: %s\n", read_buf);
+        if (/*signal == SIGUSR1 && read(pipe_fetch_to_decode[0], &instructionToDecode, sizeof(instructionToDecode)) && */(currStage == DECODE) ) {
+            printf("Decode Thread. Instruction read %08X\n", instructionToDecode);
 
-            /* Instructions to decode */
-            uint32_t instructionToDecode;
+           
 
             decodedFields df = {0};
             df.opcode = instructionToDecode & 0b1111111; /* extract opcode*/
@@ -350,7 +330,7 @@ void *decodeThread(void *arg) {
                     df.instrFields.i_type.rd = INSTRUCTION_TO_RD(instructionToDecode);
                     df.instrFields.i_type.funct3 = INSTRUCTION_TO_FUNCT3(instructionToDecode);
                     df.instrFields.i_type.rs1 = INSTRUCTION_TO_RS1(instructionToDecode);
-                    df.instrFields.i_type.imm12 = INSTRUCTION_TO_IMMI(instructionToDecode);
+                    df.instrFields.i_type.imm12 = INSTRUCTION_TO_IMMI_20(instructionToDecode);
                     // Logical I-type
                     if (df.opcode == LOGICAL_I_TYPE){
                         switch(df.instrFields.i_type.funct3){
@@ -440,29 +420,44 @@ void *decodeThread(void *arg) {
                         }
                     }
                     break;
+
                 case S_TYPE:
 
                     break;
                 case B_TYPE:
-
+                    df.instrFields.b_type.rs1 = INSTRUCTION_TO_RS1(instructionToDecode);
+                    df.instrFields.b_type.rs2 = INSTRUCTION_TO_RS2(instructionToDecode);
+                    df.instrFields.b_type.funct3 = INSTRUCTION_TO_FUNCT3(instructionToDecode);
+                    df.instrFields.b_type.imm12 = INSTRUCTION_TO_IMM_B(instructionToDecode);
+                                // df.instrFields.b_type.imm12 =  
+                                // switch(df.instrFields.b_type.funct3){
+                                //     break;
+                                //     default:
+                                //     perror("b type instruction error");
+                                // }
                     break;
+
+                        // Branch
                 case U_TYPE:
-                
+                    df.instrFields.u_type.rd = INSTRUCTION_TO_RD(instructionToDecode);
+                    df.instrFields.u_type.imm20 = INSTRUCTION_TO_IMM_U(instructionToDecode);
                     break;
                 case J_TYPE:
-                    
+                    //TODO
                     break;
 
                 case 0b0101111://atomic extension
                     break;
                 default:
-                printf("Instruction type: %d not found", df.instruction_type);
-                    break;
+                    printf("Instruction type: %d not found", df.instruction_type);
+                    break;    
             }
 
 
             /* Pass df to pipe */
             write(pipe_decode_to_execute[1], &df, sizeof(df));
+            
+            currStage = EXECUTE;
 
             
 
@@ -506,6 +501,7 @@ void *executeThread(void *arg) {
 
             /* pass the result of the alu operation */
             write(pipe_execute_to_memAccess[1], &aluResult, sizeof(aluResult));
+            currStage = MEM_ACCESS;
         } else {
             perror("Nothing to execute yet");
         }
@@ -527,6 +523,7 @@ void *memAccessThread(void *arg) {
             char message[] = "Memory accessed";
             
             write(pipe_memAccess_to_regWrite[1], &valueFromExecute, sizeof(valueFromExecute));
+            currStage = REG_WRITE_BACK;
         } else {
             perror("Nothing to access in memory yet");
         }
@@ -549,7 +546,36 @@ void *regWriteThread(void *arg) {
         } else {
             perror("Nothing to write to register yet");
         }
+
+        currStage = FETCH;
     }
 
 }
 
+INSTR_TYPE get_Instr_Type(uint8_t opcode) {
+    if ((opcode & MSB_8BIT) != 0){
+        printf("Invalid Instruction Type: %d", opcode);
+        exit(1);
+    }
+    switch(opcode){
+        case(0b0110011):
+            return R_TYPE;
+        case(0b0000011):
+            return I_TYPE;
+        case(0b0010011):
+            return I_TYPE;
+        case(0b1100111):
+            return I_TYPE;
+        case(0b0100011):
+            return S_TYPE;
+        case(0b1100011):
+            return B_TYPE;
+        case(0b0110111):
+            return U_TYPE;
+        case(0b1101111):
+            return J_TYPE;
+        default:
+            printf("OPCode not recognized: %d", opcode);
+            exit(1);
+    }
+}

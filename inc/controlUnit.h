@@ -208,5 +208,6 @@ void sigint_handler(int sig);
 
 INSTR_TYPE get_Instr_Type(uint8_t opcode);
 
+
 #define MSB_8BIT 0x80 //10000000
 #endif // PIPELINE_H

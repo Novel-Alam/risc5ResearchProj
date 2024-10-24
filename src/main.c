@@ -1,8 +1,10 @@
 #include "controlUnit.h"
 #include "ram.h"
+#include "registers.h"
 /* Main function */
 int main() {
     signal(SIGINT, sigint_handler);  // Register SIGINT handler
+    initRegFile(&regFile);
     initializeSignal();
     initialPipes();
     initializeThreads();
@@ -12,18 +14,20 @@ int main() {
     initRam(data_ram, UINT32_MAX);
     initRam(instruction_ram, UINT32_MAX);
 
+    
+        pthread_kill(fetchThreadHandle, SIGUSR1);
+
     for (;;) {
         printf("\n\n\n");
         /* Simulate signal delivery */
-        pthread_kill(regWriteThreadHandle, SIGUSR1);
-        usleep(100);
-        pthread_kill(memAccessThreadHandle, SIGUSR1);
-        usleep(100);
-        pthread_kill(executeThreadHandle, SIGUSR1);
-        usleep(100);
-        pthread_kill(decodeThreadHandle, SIGUSR1);
-        usleep(100);
-        pthread_kill(fetchThreadHandle, SIGUSR1);
+        // pthread_kill(regWriteThreadHandle, SIGUSR1);
+        // usleep(100);
+        // pthread_kill(memAccessThreadHandle, SIGUSR1);
+        // usleep(100);
+        // pthread_kill(executeThreadHandle, SIGUSR1);
+        // usleep(100);
+        // pthread_kill(decodeThreadHandle, SIGUSR1);
+        // usleep(100);
         sleep(5);  // Delay to simulate timing
         
     }

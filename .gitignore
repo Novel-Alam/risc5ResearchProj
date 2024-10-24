@@ -16,6 +16,8 @@
 *.map
 *.exp
 
+my_program*.dSYM
+
 # Precompiled Headers
 *.gch
 *.pch
