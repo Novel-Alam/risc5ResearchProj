@@ -37,9 +37,10 @@ def main():
         result = subprocess.run(make_call_args, capture_output=True, text=True)
         if verbose: print(result.stdout)
     if result.returncode == 0:
-        print("Make succeeded.")
-        print("Output:")
-        print(result.stdout)  # Output from the command
+        print("Make succeeded. :3")
+        if verbose:
+            print("Output:")
+            print(result.stdout)  # Output from the command
     else:
         print("Make failed.")
         print("Error:")
