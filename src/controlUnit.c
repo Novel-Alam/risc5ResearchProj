@@ -20,8 +20,11 @@
 #define INSTRUCTION_TO_FUNCT7(instruction) (((instruction) >> 25) & 0b1111111)
 #define INSTRUCTION_TO_IMM_B(instruction) ((instruction >> 25) & 0b1111111) + ((instruction >> 6) & 0b11111)
 #define INSTRUCTION_TO_IMM_U(instruction) (instruction >> 11 & 0b11111111111)
-#define INSTRUCTION_TO_IMMI_20(instructionToDecode) ( (instructionToDecode >> 20) && 0b1111111)
-// #define INSTRUCTION_TO_IMMI_11(instructionToDecode) ( (instructionToDecode >> 20) && 0b1111111)
+
+// #define INSTRUCTION_TO_IMMI_20(instructionToDecode) ( (instructionToDecode >> 20) & 0b1111111)
+
+#define INSTRUCTION_TO_IMMI_12(instructionToDecode) ( (instructionToDecode >> 20) & 0b111111111111)
+// #define INSTRUCTION_TO_IMMI_11(instructionToDecode) ( (instructionToDecode >> 20) & 0b1111111)
 
 #define LOGICAL_I_TYPE 0b0010011
 #define LOAD_I_TYPE 0b0000011
@@ -161,7 +164,7 @@ void *fetchThread(void *arg) {
             regFile.programCounter += 4;
 
             /* Pass the fetched uint32_t instruction */
-            write( pipe_fetch_to_decode[1], (char *) &regFile.instructionRegister, sizeof(regFile.instructionRegister) );
+            write( pipe_fetch_to_decode[1], (char *) &regFile.instructionRegister, sizeof(regFile.instructionRegister) ); /* replace  with fucntion clal*/
 
             currStage = DECODE;
             pthread_kill(decodeThreadHandle, SIGUSR1);
@@ -187,7 +190,7 @@ void *decodeThread(void *arg) {
         /* Block on signal */
         sigwait(set, &signal);
 
-        if (/*signal == SIGUSR1 && read(pipe_fetch_to_decode[0], &instructionToDecode, sizeof(instructionToDecode)) && */(currStage == DECODE) ) {
+        if (signal == SIGUSR1 && read(pipe_fetch_to_decode[0], &instructionToDecode, sizeof(instructionToDecode)) && (currStage == DECODE) ) {
             printf("Decode Thread. Instruction read %08X\n", instructionToDecode);
 
            
@@ -330,7 +333,7 @@ void *decodeThread(void *arg) {
                     df.instrFields.i_type.rd = INSTRUCTION_TO_RD(instructionToDecode);
                     df.instrFields.i_type.funct3 = INSTRUCTION_TO_FUNCT3(instructionToDecode);
                     df.instrFields.i_type.rs1 = INSTRUCTION_TO_RS1(instructionToDecode);
-                    df.instrFields.i_type.imm12 = INSTRUCTION_TO_IMMI_20(instructionToDecode);
+                    df.instrFields.i_type.imm12 = INSTRUCTION_TO_IMMI_12(instructionToDecode);
                     // Logical I-type
                     if (df.opcode == LOGICAL_I_TYPE){
                         switch(df.instrFields.i_type.funct3){
@@ -458,6 +461,7 @@ void *decodeThread(void *arg) {
             write(pipe_decode_to_execute[1], &df, sizeof(df));
             
             currStage = EXECUTE;
+            pthread_kill(executeThreadHandle, SIGUSR1);
 
             
 
@@ -468,7 +472,7 @@ void *decodeThread(void *arg) {
 }
 
 /* Execute Thread */
-void *executeThread(void *arg) {
+void *executeThread(void *arg) { /* replace with fucntion */
     sigset_t *set = (sigset_t *)arg;
     int signal;
     
@@ -485,10 +489,12 @@ void *executeThread(void *arg) {
             /* Execute the command */
             switch (df.microOp) {
                 case OP_ADD: 
-                    aluResult =  alu_add(regFile.generalRegisters[df.instrFields.r_type.rs1], regFile.generalRegisters[df.instrFields.r_type.rs2]);
+                    aluOut.result =  alu_add(regFile.generalRegisters[df.instrFields.r_type.rs1], regFile.generalRegisters[df.instrFields.r_type.rs2]);
                     break;
                 case OP_ADDI:
-                    aluResult = alu_add(regFile.generalRegisters[df.instrFields.i_type.rs1], (uint32_t)df.instrFields.i_type.imm12);
+                    aluOut.result = alu_add(regFile.generalRegisters[df.instrFields.i_type.rs1], (uint32_t)df.instrFields.i_type.imm12);
+                    aluOut.rd = df.instrFields.i_type.rd;
+                    break;
                 case OP_SUB:
                     aluResult =  alu_sub(regFile.generalRegisters[df.instrFields.r_type.rs1], regFile.generalRegisters[df.instrFields.r_type.rs2]);
                     break;
@@ -499,10 +505,12 @@ void *executeThread(void *arg) {
             }
             
 
+        
             /* pass the result of the alu operation */
-            write(pipe_execute_to_memAccess[1], &aluResult, sizeof(aluResult));
-            currStage = MEM_ACCESS;
-        } else {
+            write(pipe_execute_to_memAccess[1], &aluOut, sizeof(aluOut));
+            currStage = REG_WRITE_BACK;
+            pthread_kill(regWriteThreadHandle, SIGUSR1);
+        } else {//need to pass rd too evnentually truee , wait we created a struct for alu output 
             perror("Nothing to execute yet");
         }
     }
@@ -524,6 +532,8 @@ void *memAccessThread(void *arg) {
             
             write(pipe_memAccess_to_regWrite[1], &valueFromExecute, sizeof(valueFromExecute));
             currStage = REG_WRITE_BACK;
+            pthread_kill(regWriteThreadHandle, SIGUSR1);
+
         } else {
             perror("Nothing to access in memory yet");
         }
@@ -542,12 +552,13 @@ void *regWriteThread(void *arg) {
 
         if (signal == SIGUSR1 && read(pipe_memAccess_to_regWrite[0], &valueFromExecute, sizeof(valueFromExecute)) && (currStage == REG_WRITE_BACK) ) {
             printf("Register Write Thread: %s\n", valueFromExecute);
-            regFile.generalRegisters[2];
+            regFile.generalRegisters[aluOut.rd] = aluOut.result;
         } else {
             perror("Nothing to write to register yet");
         }
 
         currStage = FETCH;
+        pthread_kill(fetchThreadHandle, SIGUSR1);
     }
 
 }

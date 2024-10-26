@@ -19,6 +19,7 @@
 typedef struct {
     int32_t operand_1; //Parameter 1
     uint32_t operand_2; //Parameter 2
+    uint8_t rd;
     uint32_t result;
     uint8_t microOp;  /* Set by the control unit*/
     bool zero_flag;;
@@ -26,6 +27,8 @@ typedef struct {
     bool parity_flag;
     bool overflow_flag;
 } decoder_to_execute; 
+
+extern decoder_to_execute aluOut;
 
 // void ALU_Runner(decoder_to_execute *alu, uint8_t op, uint32_t *parameters);
 

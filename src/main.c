@@ -1,6 +1,6 @@
-#include "controlUnit.h"
-#include "ram.h"
-#include "registers.h"
+#include "../inc/controlUnit.h"
+#include "../inc/ram.h"
+#include "../inc/registers.h"
 /* Main function */
 int main() {
     signal(SIGINT, sigint_handler);  // Register SIGINT handler
@@ -14,9 +14,7 @@ int main() {
     initRam(data_ram, UINT32_MAX);
     initRam(instruction_ram, UINT32_MAX);
 
-    
         pthread_kill(fetchThreadHandle, SIGUSR1);
-
     for (;;) {
         printf("\n\n\n");
         /* Simulate signal delivery */
