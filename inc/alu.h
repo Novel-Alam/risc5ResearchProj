@@ -4,9 +4,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-
-
-
+#define CARRY_FLAG         (1 << 0)  
+#define ZERO_FLAG          (1 << 1)  
+#define NEGATIVE_FLAG      (1 << 2)  
+#define OVERFLOW_FLAG      (1 << 3)  
+#define PARITY_FLAG        (1 << 4)  
+#define AUX_CARRY_FLAG     (1 << 5)  // for BCD
+#define INTERRUPT_FLAG     (1 << 6)  
+#define DIRECTION_FLAG     (1 << 7)  
+#define TRAP_FLAG          (1 << 8)  
 /**
  * The control unit fetch state populates this 
  */
@@ -31,6 +37,10 @@ extern decoder_to_execute aluOut;
 //==========================================Arithmetic Operations==========================================
 uint32_t alu_add(uint32_t a, uint32_t b);
 uint32_t alu_sub(uint32_t a, uint32_t b);
+
+void alu_wrapper(uint32_t a, uint32_t b, uint32_t *result, uint32_t *flags); 
+void alu_sub_wrapper(uint32_t a, uint32_t b, uint32_t *result, uint32_t *flags); 
+
 // uint32_t alu_mul(uint32_t a, uint32_t b);
 // uint32_t alu_div(uint32_t a, uint32_t b);
 // int32_t alu_div_signed(int32_t a, int32_t b);
