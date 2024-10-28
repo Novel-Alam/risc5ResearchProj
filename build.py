@@ -50,7 +50,6 @@ def main():
         print("Make failed.")
         print("Error:")
         print(result.stderr)  # Error message from the command
-    # print("Build Complete! Please call ./exec.sh to run program")
     sys.exit(0)
 
 if __name__ == "__main__":
