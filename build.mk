@@ -11,8 +11,6 @@ CFLAGS = -I$(INC_DIR) -Wall -Wextra# Flags for C Compiler
 
 ifdef DEBUG
 	CFLAGS += -g
-# else 
-# 	CFLAGS += -DNDEBUG
 endif
 
 # Find all .c files in the src directory
