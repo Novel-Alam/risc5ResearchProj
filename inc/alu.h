@@ -4,9 +4,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-
-
-
 /**
  * The control unit fetch state populates this 
  */
